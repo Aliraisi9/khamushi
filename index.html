@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>خاموشی | بازی جرئت و حقیقت</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;900&family=Lalezar&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- تعریف مرکزی آیکون‌های خطی -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="icon-dice" viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <circle cx="8.2" cy="8.2" r="1.15" fill="currentColor"/>
+      <circle cx="15.8" cy="8.2" r="1.15" fill="currentColor"/>
+      <circle cx="12" cy="12" r="1.15" fill="currentColor"/>
+      <circle cx="8.2" cy="15.8" r="1.15" fill="currentColor"/>
+      <circle cx="15.8" cy="15.8" r="1.15" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path d="M4.5 12.5l4.7 4.7L19.5 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ══════ هشدار سنی +۱۸ — قبل از هرچیز باید تایید بشه ══════ -->
+<div class="age-gate" id="ageGate">
+  <div class="age-gate-box">
+    <h1><svg class="icon icon-brand" aria-hidden="true"><use href="#icon-dice"/></svg> <span class="gold-text">به خاموشی خوش اومدی</span> <svg class="icon icon-brand" aria-hidden="true"><use href="#icon-dice"/></svg></h1>
+    <h2 style="margin-top: 24px;">محتوای این سایت برای بزرگسالانه</h2>
+    <p>خاموشی شامل سوالات و چالش‌های صریح و بزرگسالانه‌ است <br>(بحث دربارهٔ روابط، سکس، و مصرف الکل به‌عنوان جریمهٔ پیشنهادی). اگه زیر ۱۸ سال داری یا این نوع محتوا رو دوست نداری، لطفاً وارد نشو.</p>
+    <div class="age-gate-actions">
+      <button class="btn-start" onclick="confirmAgeGate()">۱۸ سالمه، وارد شو</button>
+      <a href="https://www.google.com" class="age-gate-exit">خروج</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <nav class="nav-links">
+      <a href="#" class="active" data-page="home">خانه</a>
+      <a href="#" data-page="game">بازی</a>
+      <a href="#" data-page="settings">بسته‌ها</a>
+      <a href="#" data-page="rules">قوانین</a>
+      <a href="#" data-page="about">حمایت</a>
+    </nav>
+  </div>
+</header>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════ HOME ══════ -->
+<section class="page active" id="page-home">
+  <div class="home-hero">
+    <h2><span class="gold-text">یخ‌ها رو بشکن، جمع رو نزدیک‌تر کن! 🔥</span></h2>
+    <p>دنبال یه راه عالی برای گرم کردن جمع‌های دوستانه یا صمیمی‌تر شدن تو دورهمی‌های تازه‌اید؟ این بازی دقیقا همون چیزیه که احتیاج دارید! <br>
+<strong style="color: #f2ead9;">اینجا همه‌چیز دست خودتونه؛ قانون‌ها رو شما تعیین می‌کنید.</strong> <br> می‌خواید یه شب پر از هیجان و بی‌پروا داشته باشید یا ترجیح میدید حالت خانوادگی رو فعال کنید و یه دل سیر کنار هم خوش بگذرونید؟
+صداقت رو چاشنی کار کنید، بی‌پروا باشید و لول صمیمیت جمعتون رو چند پله بالا ببرید. ولی یادتون نره… خاموشی در آخر فقط یه بازیه! 
+    </p>
+    <button class="btn-start" onclick="goToPage('game')">شروع بازی</button>
+  </div>
+
+  <div class="how-to-play-wrap">
+    <div class="section-title" style="text-align:center">بازی چطوریه؟</div>
+    <div class="info-card">
+      <p>این یه بازی جرئت‌وحقیقته رو یه زمین ۶۰ خونه‌ای. هر خونه یه رنگ و یه عدد بین ۱ تا ۶ داره که هر دور بازی بصورت انحصاری جنریت میشه.</p>
+      <p>عدد خونه یعنی شدت جریمهٔ امتناع: <br> <strong>۶ یعنی جریمهٔ کامل</strong>، <strong>۱ یعنی یک‌ششم جریمهٔ کامل.</strong></p>
+      <p>اینکه خود جریمه چی باشه و با چه قصدی بازی می‌کنید، کاملاً دست خودتونه، نوشیدنی الکلی یا هرچیز دیگه‌ای که جمع اوکی باشه.<br>  حتی می‌تونید کلاً جریمه رو حذف کنید و فقط از روند بازی لذت ببرید.</p>
+      <p>چهار رنگ اصلی بازی: <br> <span class="rule-dot dot-Red"></span> قرمز و <span class="rule-dot dot-Blue"></span> آبی (تندتر و صریح‌تر)، <span class="rule-dot dot-Green"></span> سبز و <span class="rule-dot dot-Yellow"></span> زرد (سبک‌تر و بامزه‌تر). <br> از بخش «بسته‌ها» هم می‌تونید بسته‌های الحاقی رو فعال کنید.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ GAME ══════ -->
+<section class="page" id="page-game">
+  <div class="game-wrap">
+    <h1><svg class="icon icon-brand" aria-hidden="true"><use href="#icon-dice"/></svg> <span class="gold-text">بازی خاموشی</span></h1>
+    <p class="game-privacy">این بازی ذخیره نمی‌شه و هیچ داده‌ای نگه نمی‌داره</p>
+
+    <div class="active-packs-bar" id="activePacksBar"></div>
+
+    <div class="players-section">
+      <div class="players-label">بازیکنان</div>
+      <p class="how-to-play-hint">اسم هر بازیکن رو تایپ کن و «+» رو بزن (یا Enter بزن) <br> حداقل ۲ نفر لازمه تا دکمهٔ «تاس بریز» فعال بشه.</p>
+      <div class="players-list" id="playersList">
+        <span class="empty-hint">هنوز کسی اضافه نشده</span>
+      </div>
+      <div class="player-input-row">
+        <input type="text" id="playerNameInput" class="player-input" placeholder="نام بازیکن..." maxlength="18"
+               onkeydown="if(event.key==='Enter')addPlayer()">
+        <button class="btn-add-player" onclick="addPlayer()" aria-label="افزودن بازیکن">+</button>
+      </div>
+    </div>
+
+    <div class="turn-display" id="turnDisplay">نوبت: <span class="turn-name" id="turnName"></span></div>
+    <div class="dice-display" id="diceDisplay"></div>
+
+    <div class="card-result" id="cardResult">
+      <div id="cardBadge" class="card-color-badge"></div>
+      <div class="card-text" id="cardText"></div>
+      <div class="card-penalty" id="cardPenalty"></div>
+      <div class="card-meta" id="cardMeta"></div>
+    </div>
+
+    <button class="btn-roll" id="btnRoll" onclick="nextTurn()" disabled>
+      <svg class="icon" aria-hidden="true"><use href="#icon-dice"/></svg> تاس بریز
+    </button>
+    <button class="link-settings" onclick="goToPage('settings')">مدیریت بسته‌ها</button>
+  </div>
+</section>
+
+<!-- ══════ SETTINGS ══════ -->
+<section class="page" id="page-settings">
+  <div class="settings-wrap">
+    <h2><span class="gold-text">بسته‌ها و سوالات</span></h2>
+    <p class="settings-sub">بسته‌های الحاقی رو برای این بازی فعال کن و سوالات دلخواهت رو تنظیم کن. <br> همه‌چیز کاملاً رایگانه.</p>
+    <div class="section-title">بسته‌های الحاقی</div>
+    <div class="packs-grid" id="packsGrid"></div>
+    <div class="section-title">دسته‌های اصلی</div>
+    <div id="mainDecksWrap"></div>
+  </div>
+</section>
+
+<!-- ══════ RULES ══════ -->
+<section class="page" id="page-rules">
+  <div class="info-wrap">
+    <h1><span class="gold-text">قوانین بازی</span></h1>
+    <div class="info-card">
+      <p>۱- هر بازیکن در نوبت خود دو تاس شش‌وجهی پرتاب می‌کند.</p>
+      <p>۲- خانه‌ها میتونن شامل چهار رنگ + بسته‌های الحاقی در صورت اضافه شدن باشن:</p>
+      <p><span class="rule-dot dot-Red"></span> <strong>قرمز</strong> — جرئت‌های تند و آتشین (سخت)</p>
+      <p><span class="rule-dot dot-Blue"></span> <strong>آبی</strong> — حقیقت درباره احساسات و روابط (سخت)</p>
+      <p><span class="rule-dot dot-Green"></span> <strong>سبز</strong> — سوالات روان‌شناختی (آسان)</p>
+      <p><span class="rule-dot dot-Yellow"></span> <strong>زرد</strong> — چالش‌های فیزیکی بامزه (آسان)</p>
+      <p><span class="rule-dot dot-pack"></span> <strong>بسته ها</strong> — خانوادگی، دخترونه، پسرونه و کاپلی</p>
+      <h4>جریمه امتناع</h4>
+      <p>بازیکنی که از انجام چالش امتناع کنه، به‌نسبت عدد خونه جریمه می‌شه (خودتون تعیین می‌کنید جریمه چیه).</p>
+      <h4>پایان بازی</h4>
+      <p>بازی هر وقت که جمع خواست تموم می‌شه. <br> قانون سفت‌وسختی وجود نداره، فقط لذت ببرید.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ SUPPORT (حمایت مالی) ══════ -->
+<section class="page" id="page-about">
+  <div class="info-wrap">
+    <h1><span class="gold-text">حمایت از خاموشی</span></h1>
+    <div class="info-card">
+      <p>خاموشی سال‌ها پیش توی یه جمع دوستانه ساخته شد؛ یه بازی برای شب‌های دورهمی، بدون هیچ قصد و برنامه‌ای برای بزرگ شدن.</p>
+      <p>چون از ایران دسترسی به نسخه‌های آنلاین مشابه خارجی سخت بود، تصمیم گرفتم خودم یه نسخهٔ آنلاین ازش بسازم تا هرکسی بتونه بدون دردسر با دوستاش بازی کنه.</p>
+      <h4><strong>«خاموشی همیشه و کاملاً رایگانه؛ هیچ هزینه و منّتی هم نیست.🍻<br> تنها حمایتی که می‌خوایم اینه که دورهم بشنشینید و خوش بگذرونید!»</strong></h4>
+      <p></p>
+    </div>
+    <div style="text-align:center">
+      <a href="https://aliraisi9.github.io/info/" target="_blank" class="btn-support">وبسایت سازنده</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ PRIVACY ══════ -->
+<section class="page" id="page-privacy">
+  <div class="info-wrap">
+    <h1><span class="gold-text">حریم خصوصی</span></h1>
+    <div class="info-card">
+      <p>خاموشی هیچ حساب کاربری نداره، هیچ اطلاعاتی از شما (اسم بازیکن‌ها) ذخیره یا به جایی ارسال نمی‌کنه.</p>
+      <p>این سایت به‌صورت کاملاً استاتیک اجرا می‌شه، یعنی هیچ سروری در پس‌زمینه دیتای شما رو پردازش یا نگه‌داری نمی‌کنه. هر چیزی که تو بازی تایپ می‌کنی (مثل اسم بازیکن‌ها)، فقط داخل همون مرورگر خودتونه و با بستن یا رفرش صفحه پاک می‌شه.</p>
+      <h4>کوکی و ردیابی</h4>
+      <p>این سایت از هیچ کوکی ردیابی، ابزار آنالیتیکس، یا تبلیغات استفاده نمی‌کنه.</p>
+      <h4>محتوای بزرگسالانه</h4>
+      <p>همون‌طور که موقع ورود دیدید، این سایت شامل محتوای بزرگسالانه‌ست و مخصوص افراد بالای ۱۸ ساله.</p>
+      <p>بیا خودمونو گول نزنیم، سن یک عدد بیشتر نیست و اینترنت هم یک جهان آزادبرای همه است.</p>
+      <h4>تماس</h4>
+      <p>اگه سوال یا نگرانی‌ای دربارهٔ این سایت داری، از طریق صفحهٔ «حمایت» می‌تونی با ما در ارتباط باشی.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© <span id="footerYear"></span> خاموشی — تمامی حقوق محفوظ است. <a href="#" data-page="privacy" onclick="goToPage('privacy');return false" style="color:inherit;"> <strong style="color:#cda45e;">حریم خصوصی</strong></a></p>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
