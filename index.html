@@ -11,6 +11,7 @@
   <link rel="shortcut icon" href="u.png" type="image/x-icon">
 </head>
 <body>
+<noscript><p style="text-align:center;padding:20px">برای اجرای بازی جاوااسکریپت باید فعال باشه.</p></noscript>
 
 <!-- تعریف مرکزی آیکون‌های خطی -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -56,6 +57,7 @@
 </header>
 
 <div class="toast" id="toast"></div>
+<p id="loadingMsg" class="loading-msg">در حال بارگذاری سوال‌ها…</p>
 
 <!-- ══════ HOME ══════ -->
 <section class="page active" id="page-home">
@@ -71,19 +73,27 @@
     <div class="section-title" style="text-align:center">بازی چطوریه؟</div>
     <div class="info-card">
       <p>این یه بازی جرئت‌وحقیقته رو یه زمین ۶۰ خونه‌ای. هر خونه یه رنگ و یه عدد بین ۱ تا ۶ داره که هر دور بازی بصورت انحصاری جنریت میشه.</p>
-      <p>عدد خونه یعنی شدت جریمهٔ امتناع: <br> <strong>۶ یعنی جریمهٔ کامل</strong>، <strong>۱ یعنی یک‌ششم جریمهٔ کامل.</strong></p>
+      <p>عدد خونه یعنی شدت جریمهٔ امتناع: <br> <strong>۶/۶ (شش‌ششم) یعنی جریمهٔ کامل</strong>، <strong>۱/۶ (یک‌ششم) یعنی یک‌ششم جریمهٔ کامل.</strong></p>
       <p>اینکه خود جریمه چی باشه و با چه قصدی بازی می‌کنید، کاملاً دست خودتونه، نوشیدنی الکلی یا هرچیز دیگه‌ای که جمع اوکی باشه.<br>  حتی می‌تونید کلاً جریمه رو حذف کنید و فقط از روند بازی لذت ببرید.</p>
       <p>چهار رنگ اصلی بازی: <br> <span class="rule-dot dot-Red"></span> قرمز و <span class="rule-dot dot-Blue"></span> آبی (تندتر و صریح‌تر)، <span class="rule-dot dot-Green"></span> سبز و <span class="rule-dot dot-Yellow"></span> زرد (سبک‌تر و بامزه‌تر). <br> از بخش «بسته‌ها» هم می‌تونید بسته‌های الحاقی رو فعال کنید.</p>
     </div>
   </div>
-    <button class="btn-start" onclick="goToPage('settings')">بسته ها</button>
+  <div class="home-actions">
+    <button class="btn-start btn-block" onclick="goToPage('game')">شروع بازی</button>
+    <div class="home-actions-grid">
+      <button class="btn-secondary" onclick="goToPage('settings')">بسته‌ها و سوالات</button>
+      <button class="btn-secondary" onclick="goToPage('rules')">قوانین</button>
+      <button class="btn-secondary" onclick="goToPage('about')">حمایت</button>
+      <button class="btn-secondary" onclick="goToPage('privacy')">حریم خصوصی</button>
+    </div>
+  </div>
 </section>
 
 <!-- ══════ GAME ══════ -->
 <section class="page" id="page-game">
   <div class="game-wrap">
     <h1><svg class="icon icon-brand" aria-hidden="true"><use href="#icon-dice"/></svg> <span class="gold-text">بازی خاموشی</span></h1>
-    <p class="game-privacy">این بازی ذخیره نمی‌شه و هیچ داده‌ای نگه نمی‌داره</p>
+    <p class="game-privacy">اسم بازیکن‌ها هیچ‌جا ذخیره نمی‌شه؛ فقط انتخاب بسته‌ها تا بستن تب نگه داشته می‌شه</p>
 
     <div class="active-packs-bar" id="activePacksBar"></div>
 
@@ -113,6 +123,18 @@
     <button class="btn-roll" id="btnRoll" onclick="nextTurn()" disabled>
       <svg class="icon" aria-hidden="true"><use href="#icon-dice"/></svg> تاس بریز
     </button>
+
+    <div class="board-section">
+      <div class="players-label">زمین بازی</div>
+      <div class="board" id="board"></div>
+      <div class="board-legend" id="boardLegend"></div>
+      <div class="board-colors-key">
+        <span><i class="dot-Red"></i>قرمز</span><span><i class="dot-Blue"></i>آبی</span>
+        <span><i class="dot-Green"></i>سبز</span><span><i class="dot-Yellow"></i>زرد</span>
+        <span><i class="dot-pack"></i>بسته</span>
+      </div>
+    </div>
+
     <button class="link-settings" onclick="goToPage('settings')">مدیریت بسته‌ها</button>
   </div>
 </section>
@@ -121,13 +143,23 @@
 <section class="page" id="page-settings">
   <div class="settings-wrap">
     <h2><span class="gold-text">بسته‌ها و سوالات</span></h2>
-    <p class="settings-sub">بسته‌های الحاقی رو برای این بازی فعال کن و سوالات دلخواهت رو تنظیم کن. <br> همه‌چیز کاملاً رایگانه.</p>
+    <p class="settings-sub">بسته‌ها و سوالات دلخواهت رو انتخاب کن و بعد «ذخیره» بزن تا روی بازی اعمال بشه. <br> همه‌چیز کاملاً رایگانه.</p>
     <div class="section-title">بسته‌های الحاقی</div>
     <div class="packs-grid" id="packsGrid"></div>
     <div class="section-title">دسته‌های اصلی</div>
     <div id="mainDecksWrap"></div>
   </div>
-      <button class="btn-start" onclick="goToPage('game')">شروع بازی</button>
+
+  <div class="save-bar" id="saveBar">
+    <div class="save-bar-inner">
+      <span class="save-status ok" id="saveStatus">همه‌چیز ذخیره شده ✓</span>
+      <div class="save-actions">
+        <button class="btn-bulk" onclick="resetSettingsToDefault()">پیش‌فرض</button>
+        <button class="btn-save" id="btnSaveSettings" onclick="saveSettingsAndApply(false)">ذخیره</button>
+        <button class="btn-start btn-sm" id="btnSaveAndPlay" onclick="saveSettingsAndApply(true)">ذخیره و بازی</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ══════ RULES ══════ -->
@@ -172,7 +204,7 @@
     <h1><span class="gold-text">حریم خصوصی</span></h1>
     <div class="info-card">
       <p>خاموشی هیچ حساب کاربری نداره، هیچ اطلاعاتی از شما (اسم بازیکن‌ها) ذخیره یا به جایی ارسال نمی‌کنه.</p>
-      <p>این سایت به‌صورت کاملاً استاتیک اجرا می‌شه، یعنی هیچ سروری در پس‌زمینه دیتای شما رو پردازش یا نگه‌داری نمی‌کنه. هر چیزی که تو بازی تایپ می‌کنی (مثل اسم بازیکن‌ها)، فقط داخل همون مرورگر خودتونه و با بستن یا رفرش صفحه پاک می‌شه.</p>
+      <p>این سایت به‌صورت کاملاً استاتیک اجرا می‌شه، یعنی هیچ سروری در پس‌زمینه دیتای شما رو پردازش یا نگه‌داری نمی‌کنه. اسم بازیکن‌ها فقط داخل همون مرورگر خودتونه و با رفرش یا بستن صفحه پاک می‌شه. انتخاب بسته‌ها و سوالات هم فقط در حافظهٔ موقت همین تب (sessionStorage) نگه داشته می‌شه و با بستن تب پاک می‌شه.</p>
       <h4>کوکی و ردیابی</h4>
       <p>این سایت از هیچ کوکی ردیابی، ابزار آنالیتیکس، یا تبلیغات استفاده نمی‌کنه.</p>
       <h4>محتوای بزرگسالانه</h4>
