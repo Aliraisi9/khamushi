@@ -699,3 +699,8 @@ footer {
 .board-colors-key { display:flex; flex-wrap:wrap; gap:4px 12px; justify-content:center; margin-top:10px; font-size:.7rem; color:var(--ivory-mute); }
 .board-colors-key i { display:inline-block; width:9px; height:9px; border-radius:50%; margin-inline-end:4px; }
 @media(max-width:400px) { .marker { width:18px; height:18px; font-size:.64rem; } .tile-num { font-size:.54rem; } }
+
+.board-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.board-head .players-label { margin:0; }
+.tile-icon { position:absolute; bottom:2px; inset-inline-end:4px; font-size:.78rem; line-height:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+@media(max-width:400px) { .tile-icon { font-size:.66rem; } }

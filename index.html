@@ -125,14 +125,10 @@
     </button>
 
     <div class="board-section">
-      <div class="players-label">زمین بازی</div>
+      <div class="board-head"><div class="players-label">زمین بازی</div><button class="btn-bulk" onclick="newBoard()">زمین جدید</button></div>
       <div class="board" id="board"></div>
       <div class="board-legend" id="boardLegend"></div>
-      <div class="board-colors-key">
-        <span><i class="dot-Red"></i>قرمز</span><span><i class="dot-Blue"></i>آبی</span>
-        <span><i class="dot-Green"></i>سبز</span><span><i class="dot-Yellow"></i>زرد</span>
-        <span><i class="dot-pack"></i>بسته</span>
-      </div>
+      <div class="board-colors-key" id="boardKey"></div>
     </div>
 
     <button class="link-settings" onclick="goToPage('settings')">مدیریت بسته‌ها</button>

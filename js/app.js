@@ -144,23 +144,67 @@ function totalActiveQuestions(s) {
 // ═══════════════════════════════════════
 //  BOARD — فقط رنگ‌هایی که سوال فعال دارن وارد زمین می‌شن
 // ═══════════════════════════════════════
-function generateBoard() {
-  boardColors = [];
-  let colors = colorsWithQuestions();
-  const packOnly = colors.length === 0 && activePackQuestions().length > 0;
-  for (let i = 0; i < 60; i++) {
-    if (i === 0) { boardColors.push({ color: 'Start', value: 0 }); continue; }
-    if (packOnly) { boardColors.push({ color: 'Pack', value: Math.floor(Math.random() * 6) + 1 }); continue; }
-    if (!colors.length) { boardColors.push({ color: 'Empty', value: 0 }); continue; }
-    const c = colors[Math.floor(Math.random() * colors.length)];
-    const v = ['Red', 'Blue'].includes(c) ? Math.floor(Math.random() * 3) + 4 : Math.floor(Math.random() * 3) + 1;
-    boardColors.push({ color: c, value: v });
+// ── ساخت زمین ──
+// خونهٔ ۰ = شروع. بقیهٔ ۵۹ خونه بین نوع‌های فعال (رنگ‌های دارای سوال + بسته‌های فعال) «تقریباً مساوی» پخش می‌شن
+// (نه کاملاً تصادفی، تا مثلاً ۲۰ تا قرمز و ۵ تا زرد نیاد) و بعد مخلوط می‌شن؛ حداکثر ۲ خونهٔ هم‌نوع پشت‌سرهم.
+const BOARD_SIZE = 60;
+const PACK_SHARE = 0.25;   // وقتی رنگ اصلی هم هست، حدود ۲۵٪ خونه‌ها بنفش (بسته) می‌شن
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+  return arr;
+}
+function spreadEvenly(items, count) {
+  const out = [];
+  const order = shuffle([...items]);             // تا باقی‌ماندهٔ تقسیم هر بار به نوع‌های متفاوت برسه
+  for (let i = 0; i < count; i++) out.push(order[i % order.length]);
+  return out;
+}
+const tileKey = t => t.color + (t.packId || '');
+function maxRun(seq) {
+  let run = 1, max = 1;
+  for (let i = 1; i < seq.length; i++) { run = tileKey(seq[i]) === tileKey(seq[i - 1]) ? run + 1 : 1; max = Math.max(max, run); }
+  return max;
+}
+function tileValue(color) {
+  if (color === 'Red' || color === 'Blue') return Math.floor(Math.random() * 3) + 4;   // ۴ تا ۶
+  if (color === 'Green' || color === 'Yellow') return Math.floor(Math.random() * 3) + 1; // ۱ تا ۳
+  return Math.floor(Math.random() * 6) + 1;                                              // بسته: ۱ تا ۶
+}
+
+function generateBoard() {
+  const colors = colorsWithQuestions();
+  const packs = addOnPacks.filter(p => applied.packs.has(p.id) && applied.addon[p.id].size > 0);
+  const n = BOARD_SIZE - 1;
+
+  const packCount = packs.length ? (colors.length ? Math.round(n * PACK_SHARE) : n) : 0;
+  const colorCount = colors.length ? n - packCount : 0;
+
+  let seq = [
+    ...spreadEvenly(colors, colorCount).map(c => ({ color: c })),
+    ...spreadEvenly(packs.map(p => p.id), packCount).map(id => ({ color: 'Pack', packId: id }))
+  ];
+  while (seq.length < n) seq.push({ color: 'Empty' });    // فقط وقتی هیچ سوالی فعال نیست
+  // مخلوط کردن تا وقتی که سه خونهٔ هم‌نوع پشت‌سرهم نباشه (اگه نوع‌ها خیلی کم باشن، بهترین نتیجه می‌مونه)
+  let best = null, bestRun = Infinity;
+  for (let k = 0; k < 200 && bestRun > 2; k++) {
+    const cand = shuffle([...seq]);
+    const r = maxRun(cand);
+    if (r < bestRun) { best = cand; bestRun = r; }
+  }
+  seq = best;
+
+  boardColors = [{ color: 'Start', value: 0 }, ...seq.map(t => ({ ...t, value: t.color === 'Empty' ? 0 : tileValue(t.color) }))];
 }
 
 const TILE_CLASS = { Red: 'tile-Red', Blue: 'tile-Blue', Green: 'tile-Green', Yellow: 'tile-Yellow', Pack: 'tile-Pack', Empty: 'tile-Empty', Start: 'tile-Start' };
 const COLS = 6;
 
+function packById(id) { return addOnPacks.find(p => p.id === id); }
+function packIcon(id) { const p = packById(id); return p ? (p.icon || packInitial(p.name)) : ''; }
 function playerColor(i) { return PLAYER_COLORS[i % PLAYER_COLORS.length]; }
 
 // زمین ۶۰ خونه‌ای به‌صورت مارپیچ (۶ ستون × ۱۰ ردیف)؛ خونهٔ ۰ شروع و ۵۹ آخره، بعدش دوباره از شروع
@@ -176,9 +220,21 @@ function renderBoard() {
       `<span class="marker" style="background:${playerColor(x.pi)}" title="${escapeHtml(x.p.name)}">${toFa(x.pi + 1)}</span>`).join('');
     return `<div class="tile ${TILE_CLASS[t.color] || ''} ${i === lastTileIndex ? 'last' : ''}" style="grid-row:${row + 1};grid-column:${col}">
       <span class="tile-num">${i === 0 ? '★' : toFa(i)}</span>
+      ${t.color === 'Pack' ? `<span class="tile-icon">${packIcon(t.packId)}</span>` : ''}
       ${markers ? `<span class="markers">${markers}</span>` : ''}
     </div>`;
   }).join('');
+  const key = document.getElementById('boardKey');
+  if (key) {
+    const types = new Map();
+    boardColors.forEach(t => {
+      if (t.color === 'Start' || t.color === 'Empty') return;
+      types.set(tileKey(t), t.color === 'Pack'
+        ? `<span><i class="dot-pack"></i>${packIcon(t.packId)} ${escapeHtml(packById(t.packId)?.name || '')}</span>`
+        : `<span><i class="dot-${t.color}"></i>${COLOR_LABELS[t.color]}</span>`);
+    });
+    key.innerHTML = [...types.values()].join('');
+  }
   const legend = document.getElementById('boardLegend');
   if (legend) {
     legend.innerHTML = players.length
@@ -194,7 +250,6 @@ function resetGameProgress() {
   currentPlayerIndex = 0;
   generateBoard();
   document.getElementById('cardResult').classList.remove('show');
-  document.getElementById('turnDisplay').classList.remove('show');
   document.getElementById('diceDisplay').classList.remove('show');
   renderPlayers();
   renderActivePacksBar();
@@ -235,6 +290,8 @@ function renderPlayers() {
   const btn = document.getElementById('btnRoll');
   if (btn) btn.disabled = players.length < 2 || rolling;
 
+  const td = document.getElementById('turnDisplay');
+  if (td) td.classList.toggle('show', players.length >= 2);
   renderBoard();
 
   const turnNameEl = document.getElementById('turnName');
@@ -258,20 +315,23 @@ function pickNoRepeat(pool) {
   return pick;
 }
 
-function drawCard(color) {
-  const mainPool = (mainDecks[color]?.questions || []).filter(q => applied.main[color]?.has(q.id));
-  const packPool = activePackQuestions().map(x => ({ id: x.q.id, text: x.q.text, packName: x.packName }));
-
-  let fromPack = false;
-  if (!mainPool.length) fromPack = packPool.length > 0;                    // رنگ بدون سوال (یا زمین فقط-بسته)
-  else if (packPool.length > 0 && Math.random() < 0.25) fromPack = true;   // ۲۵٪ شانس بستهٔ الحاقی
-
-  if (fromPack) {
-    const pick = pickNoRepeat(packPool);
-    return { text: pick.text, isAddon: true, packName: pick.packName };
+// سوال هر خونه فقط از «نوع همون خونه» میاد: رنگ ← همون رنگ، بنفش ← همون بسته
+function drawCard(tile) {
+  if (tile.color === 'Pack') {
+    const pack = packById(tile.packId);
+    let pool = pack && applied.packs.has(pack.id) ? pack.questions.filter(q => applied.addon[pack.id].has(q.id)) : [];
+    let name = pack ? pack.name : '';
+    if (!pool.length) {                                    // محافظ: بستهٔ این خونه خالی شده
+      const any = activePackQuestions().map(x => ({ id: x.q.id, text: x.q.text, packName: x.packName }));
+      if (!any.length) return { text: 'سوال فعالی نمونده! از بخش «بسته‌ها» یکی رو فعال کن 😅', isAddon: false, empty: true };
+      const pick = pickNoRepeat(any);
+      return { text: pick.text, isAddon: true, packName: pick.packName };
+    }
+    return { text: pickNoRepeat(pool).text, isAddon: true, packName: name };
   }
-  if (!mainPool.length) return { text: 'سوال فعالی نمونده! از بخش «بسته‌ها» یکی رو فعال کن 😅', isAddon: false, empty: true };
-  return { text: pickNoRepeat(mainPool).text, isAddon: false };
+  const mainPool = (mainDecks[tile.color]?.questions || []).filter(q => applied.main[tile.color]?.has(q.id));
+  if (mainPool.length) return { text: pickNoRepeat(mainPool).text, isAddon: false };
+  return { text: 'سوال فعالی نمونده! از بخش «بسته‌ها» یکی رو فعال کن 😅', isAddon: false, empty: true };
 }
 
 // ═══════════════════════════════════════
@@ -288,30 +348,33 @@ function nextTurn() {
   if (players.length < 2) { showToast('حداقل دو بازیکن وارد کن'); return; }
   if (totalActiveQuestions(applied) === 0) { showToast('هیچ سوال فعالی نیست؛ از «بسته‌ها» فعال کن'); return; }
   rolling = true;
-  const btn = document.getElementById('btnRoll');
-  btn.disabled = true;
+  document.getElementById('btnRoll').disabled = true;
 
+  // بازیکنی که الان تاس می‌ریزه؛ تا آخر انیمیشن و نمایش کارت، «نوبت» و هایلایت روی همین نفره
   const player = players[currentPlayerIndex];
-  document.getElementById('turnDisplay').classList.add('show');
   document.getElementById('turnName').textContent = player.name;
+  renderPlayers();
 
+  // تاس‌ها از اول مشخصن و انیمیشن آخرش دقیقاً همین‌ها رو نشون می‌ده
+  const d1 = Math.floor(Math.random() * 6) + 1, d2 = Math.floor(Math.random() * 6) + 1;
+  const dice = d1 + d2;
   const diceEl = document.getElementById('diceDisplay');
-  diceEl.classList.add('show'); diceEl.classList.remove('anim');
+  diceEl.classList.add('show');
 
   let n = 0;
   const iv = setInterval(() => {
-    const d1 = Math.floor(Math.random() * 6) + 1, d2 = Math.floor(Math.random() * 6) + 1;
-    diceEl.textContent = DICE[d1] + ' ' + DICE[d2];
-    if (++n >= 10) {
-      clearInterval(iv);
-      const dice = rollDice();
-      player.position = (player.position + dice) % boardColors.length;
-      lastTileIndex = player.position;
-      showTileResult(boardColors[player.position], player, dice);
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      rolling = false;
-      renderPlayers();   // شامل رندر دوبارهٔ زمین با جای جدید مهره‌ها
+    if (++n < 10) {
+      diceEl.textContent = DICE[Math.floor(Math.random() * 6) + 1] + ' ' + DICE[Math.floor(Math.random() * 6) + 1];
+      return;
     }
+    clearInterval(iv);
+    diceEl.textContent = `${DICE[d1]} ${DICE[d2]}  =  ${toFa(dice)}`;
+    player.position = (player.position + dice) % boardColors.length;
+    lastTileIndex = player.position;
+    showTileResult(boardColors[player.position], player, dice);
+    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;   // حالا نوبت نفر بعدی
+    rolling = false;
+    renderPlayers();
   }, 75);
 }
 
@@ -329,7 +392,7 @@ function showTileResult(tile, player, dice) {
     return;
   }
 
-  const result = drawCard(tile.color);
+  const result = drawCard(tile);
   if (result.isAddon) {
     badge.textContent = result.packName;           // اسم خود بسته، نه عبارت کلی «بستهٔ الحاقی»
     badge.className = 'card-color-badge badge-pack';
@@ -339,7 +402,7 @@ function showTileResult(tile, player, dice) {
   }
   document.getElementById('cardText').textContent = result.text;
   document.getElementById('cardPenalty').textContent = result.empty ? '' : penaltyText(tile.value);
-  document.getElementById('cardMeta').textContent = `خونهٔ ${player.position} • تاس: ${dice}`;
+  document.getElementById('cardMeta').textContent = `${player.name} • خونهٔ ${toFa(player.position)} • تاس: ${toFa(dice)}`;
   animateCard(res);
 }
 
@@ -366,7 +429,7 @@ function renderPackCard(pack) {
   return `<div class="pack-card ${isActive ? 'enabled' : ''}" id="packcard-${pack.id}">
     <div class="pack-header" onclick="togglePackExpand('${pack.id}')">
       <div class="pack-header-left">
-        <span class="pack-avatar">${packInitial(pack.name)}</span>
+        <span class="pack-avatar">${pack.icon || packInitial(pack.name)}</span>
         <div>
           <div class="pack-name">${pack.name}</div>
           <div class="pack-desc" id="packcount-${pack.id}">${en.size} از ${pack.questions.length} سوال فعال</div>
@@ -496,6 +559,13 @@ function saveSettingsAndApply(goPlay) {
   } else if (changed) {
     showToast('ذخیره شد؛ بازی با تنظیمات جدید رفرش شد');
   }
+}
+
+function newBoard() {
+  if (rolling) return;
+  if (players.some(p => p.position > 0) && !confirm('زمین جدید ساخته بشه و همه برگردن به خونهٔ شروع؟')) return;
+  resetGameProgress();
+  showToast('زمین جدید ساخته شد');
 }
 
 function resetSettingsToDefault() {
