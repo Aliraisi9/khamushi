@@ -12,6 +12,7 @@ const COLOR_LABELS = { Red: 'قرمز', Blue: 'آبی', Green: 'سبز', Yellow:
 
 let players = [], currentPlayerIndex = 0, boardColors = [];
 let rolling = false;
+let turnPending = false;                // true = بازیکنِ فعلی تاسش رو ریخته و کارتش روی صفحه‌ست؛ نوبت با تاس بعدی عوض می‌شه
 let lastTileIndex = -1;                 // آخرین خونه‌ای که بازیکن روش نشسته (برای هایلایت)
 const drawn = new Set();                // سوال‌هایی که تو این دور دیده شدن (برای جلوگیری از تکرار)
 const PLAYER_COLORS = ['#ff5c8a', '#4dd0e1', '#ffd54f', '#b388ff', '#69f0ae', '#ff9e40', '#80b4ff', '#e0e0e0'];
@@ -245,6 +246,7 @@ function renderBoard() {
 
 function resetGameProgress() {
   drawn.clear();
+  turnPending = false;
   lastTileIndex = -1;
   players.forEach(p => p.position = 0);
   currentPlayerIndex = 0;
@@ -273,6 +275,7 @@ function removePlayer(i) {
   if (rolling) return;
   players.splice(i, 1);
   if (i < currentPlayerIndex) currentPlayerIndex--;
+  else if (i === currentPlayerIndex) turnPending = false;   // نفر بعدی جاش میاد و همون نوبتِ بعدیه
   if (currentPlayerIndex >= players.length) currentPlayerIndex = 0;
   renderPlayers();
 }
@@ -293,6 +296,14 @@ function renderPlayers() {
   const td = document.getElementById('turnDisplay');
   if (td) td.classList.toggle('show', players.length >= 2);
   renderBoard();
+
+  const rollLabel = document.getElementById('rollLabel');
+  if (rollLabel) {
+    const upcoming = players.length ? players[turnPending ? (currentPlayerIndex + 1) % players.length : currentPlayerIndex] : null;
+    rollLabel.textContent = upcoming && players.length >= 2
+      ? (turnPending ? `تاس بعدی: ${upcoming.name}` : `تاس بریز: ${upcoming.name}`)
+      : 'تاس بریز';
+  }
 
   const turnNameEl = document.getElementById('turnName');
   if (turnNameEl && players[currentPlayerIndex]) {
@@ -350,7 +361,8 @@ function nextTurn() {
   rolling = true;
   document.getElementById('btnRoll').disabled = true;
 
-  // بازیکنی که الان تاس می‌ریزه؛ تا آخر انیمیشن و نمایش کارت، «نوبت» و هایلایت روی همین نفره
+  // نوبت فقط وقتی عوض می‌شه که نفر بعدی تاس رو می‌زنه؛ تا اون موقع «نوبت» و هایلایت روی کسیه که کارتش روی صفحه‌ست
+  if (turnPending) { currentPlayerIndex = (currentPlayerIndex + 1) % players.length; turnPending = false; }
   const player = players[currentPlayerIndex];
   document.getElementById('turnName').textContent = player.name;
   renderPlayers();
@@ -372,7 +384,7 @@ function nextTurn() {
     player.position = (player.position + dice) % boardColors.length;
     lastTileIndex = player.position;
     showTileResult(boardColors[player.position], player, dice);
-    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;   // حالا نوبت نفر بعدی
+    turnPending = true;     // نوبت روی همین بازیکن می‌مونه تا تاس بعدی
     rolling = false;
     renderPlayers();
   }, 75);
